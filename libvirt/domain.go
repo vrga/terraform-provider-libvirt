@@ -363,8 +363,10 @@ func setGraphics(d *schema.ResourceData, domainDef *libvirtxml.Domain, arch stri
 			domainDef.Devices.Graphics[0].VNC.Listeners = []libvirtxml.DomainGraphicListener{
 				listener,
 			}
+		case "none":
+			domainDef.Devices.Graphics = nil
 		default:
-			return fmt.Errorf("This provider only supports vnc/spice as graphics type. Provided: '%s'", graphicsType)
+			return fmt.Errorf("This provider only supports vnc/spice/none as graphics type. Provided: '%s'", graphicsType)
 		}
 	}
 	return nil
