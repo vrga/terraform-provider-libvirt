@@ -192,13 +192,27 @@ func domainGetIfacesInfo(domain libvirt.Domain, rd *schema.ResourceData) ([]libv
 	return interfaces, nil
 }
 
-func newDiskForCloudInit(virConn *libvirt.Connect, volumeKey string) (libvirtxml.DomainDisk, error) {
+func newDiskForCloudInit(virConn *libvirt.Connect, volumeKey string, domainDef *libvirtxml.Domain) (libvirtxml.DomainDisk, error) {
+
+	var deviceBus string
+	var deviceName string
+	switch domainDef.OS.Type.Machine {
+	case "q35":
+		deviceBus = "sata"
+		deviceName = "sdd"
+	default:
+		deviceBus = "ide"
+		deviceName = "hdd"
+	}
+
+	log.Printf("[INFO] Machine type is:\n%s\n", spew.Sdump(domainDef.OS.Type.Machine))
+
 	disk := libvirtxml.DomainDisk{
 		Device: "cdrom",
 		Target: &libvirtxml.DomainDiskTarget{
 			// Last device letter possible with a single IDE controller on i440FX
-			Dev: "hdd",
-			Bus: "ide",
+			Dev: deviceName,
+			Bus: deviceBus,
 		},
 		Driver: &libvirtxml.DomainDiskDriver{
 			Name: "qemu",
@@ -663,7 +677,7 @@ func setCloudinit(d *schema.ResourceData, domainDef *libvirtxml.Domain, virConn 
 		if err != nil {
 			return err
 		}
-		disk, err := newDiskForCloudInit(virConn, cloudinitID)
+		disk, err := newDiskForCloudInit(virConn, cloudinitID, domainDef)
 		if err != nil {
 			return err
 		}

@@ -651,7 +651,18 @@ func resourceLibvirtDomainUpdate(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 
-		disk, err := newDiskForCloudInit(virConn, cloudinitID)
+		xmlDomain := libvirtxml.Domain{}
+		domainXML, err := domain.GetXMLDesc(libvirt.DOMAIN_XML_SECURE)
+		if err != nil {
+			return err
+		}
+
+		err = xmlDomain.Unmarshal(domainXML)
+		if err != nil {
+			return err
+		}
+
+		disk, err := newDiskForCloudInit(virConn, cloudinitID, &xmlDomain)
 		if err != nil {
 			return err
 		}
