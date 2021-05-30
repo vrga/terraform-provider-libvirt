@@ -10,6 +10,12 @@ terraform-provider-libvirt:
 
 build: fmt-check lint-check vet-check terraform-provider-libvirt
 
+
+local_install:
+	cp ./terraform-provider-libvirt $HOME/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/0.6.0-test/linux_amd64/terraform-provider-libvirt
+
+local_build: clean build local_install
+
 install:
 	go install -ldflags "${LDFLAGS}"
 
